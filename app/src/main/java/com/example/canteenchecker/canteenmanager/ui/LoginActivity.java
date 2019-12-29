@@ -58,8 +58,6 @@ public class LoginActivity extends AppCompatActivity {
                         if(authToken != null) {
                             CanteenManagerApplication.getInstance().setAuthToken(authToken);
                             setResult(RESULT_OK);
-                            Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
-
                             //Start CanteenActivity
                             finish();
                         } else {
