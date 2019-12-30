@@ -61,6 +61,5 @@ public class ServiceProxy {
             this.username = userName;
             this.password = password;
         }
-
     }
 }
