@@ -160,7 +160,8 @@ public class CanteenFragment extends Fragment {
                 ((TextInputEditText)rootView.findViewById(R.id.edtWebsite)).getText().toString(),
                 ((TextInputEditText)rootView.findViewById(R.id.edtPhoneNumber)).getText().toString(),
                 CanteenFragment.this.canteen.getAverageRating(),
-                Integer.valueOf(((MaterialTextView)rootView.findViewById(R.id.txvAvgWaitingVal)).getText().toString().replace(" min", ""))
+                Integer.valueOf(((MaterialTextView)rootView.findViewById(R.id.txvAvgWaitingVal)).getText().toString().replace(" min", "")),
+                null
         );
     }
 

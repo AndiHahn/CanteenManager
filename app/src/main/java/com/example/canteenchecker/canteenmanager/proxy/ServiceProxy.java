@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.example.canteenchecker.canteenmanager.CanteenManagerApplication;
 import com.example.canteenchecker.canteenmanager.core.Canteen;
+import com.example.canteenchecker.canteenmanager.core.Rating;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -93,6 +94,7 @@ public class ServiceProxy {
         final String phone;
         final float averageRating;
         final int averageWaitingTime;
+        final Rating[] ratings;
 
         ProxyCanteen(Canteen canteen) {
             this.canteenId = Integer.parseInt(canteen.getId());
@@ -104,25 +106,12 @@ public class ServiceProxy {
             this.averageRating = canteen.getAverageRating();
             this.address = canteen.getLocation();
             this.averageWaitingTime = canteen.getAverageWaitingTime();
-
-            /*
-            Log.e("FUD", String.valueOf(this.canteenId));
-            Log.e("FUD", this.name);
-            Log.e("FUD", this.phone);
-            Log.e("FUD", this.website);
-            Log.e("FUD", this.meal);
-            Log.e("FUD", String.valueOf(this.mealPrice));
-            Log.e("FUD", String.valueOf(this.averageRating));
-            Log.e("FUD", this.address);
-            Log.e("FUD", String.valueOf(this.averageWaitingTime));
-
-             */
+            this.ratings = canteen.getRatings();
         }
 
         Canteen toCanteen() {
             return new Canteen(String.valueOf(canteenId), name, meal, mealPrice, address,
-                               website, phone, averageRating, averageWaitingTime);
+                               website, phone, averageRating, averageWaitingTime, ratings);
         }
-
     }
 }

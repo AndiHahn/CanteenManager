@@ -11,10 +11,11 @@ public class Canteen {
     private final String phoneNumber;
     private final float averageRating;
     private final int averageWaitingTime;
+    private final Rating[] ratings;
 
     public Canteen(String id, String name, String setMeal, float setMealPrice,
                    String location, String website, String phoneNumber,
-                   float averageRating,  int averageWaitingTime) {
+                   float averageRating,  int averageWaitingTime, Rating[] ratings) {
         this.id = id;
         this.name = name;
         this.phoneNumber = phoneNumber;
@@ -24,6 +25,7 @@ public class Canteen {
         this.averageRating = averageRating;
         this.location = location;
         this.averageWaitingTime = averageWaitingTime;
+        this.ratings = ratings;
     }
 
     public String getId() {
@@ -60,6 +62,10 @@ public class Canteen {
 
     public int getAverageWaitingTime() {
         return averageWaitingTime;
+    }
+
+    public Rating[] getRatings() {
+        return ratings;
     }
 
 }
