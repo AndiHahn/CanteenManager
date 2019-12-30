@@ -55,7 +55,6 @@ public class CanteenFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -96,9 +95,7 @@ public class CanteenFragment extends Fragment {
         public void onStartTrackingTouch(SeekBar seekBar) {}
 
         public void onStopTrackingTouch(SeekBar seekBar) {}
-
     }
-
 
     private void updateCanteen() {
         new AsyncTask<Void, Void, Canteen>() {
@@ -114,7 +111,6 @@ public class CanteenFragment extends Fragment {
 
             @Override
             protected void onPostExecute(Canteen canteen) {
-                Log.e(TAG, "On post execute");
                 CanteenFragment.this.canteen = canteen;
 
                 //update UI
@@ -133,9 +129,12 @@ public class CanteenFragment extends Fragment {
     }
 
     private void saveCanteen() {
+        clearFocusInView();
+
         new AsyncTask<Canteen, Void, String>() {
             @Override
             protected String doInBackground(Canteen... canteen) {
+
                 try {
                     return new ServiceProxy().updateAdminCanteen(CanteenManagerApplication.getInstance().getAuthToken(), canteen[0]);
                 } catch (IOException e) {
@@ -163,5 +162,15 @@ public class CanteenFragment extends Fragment {
                 CanteenFragment.this.canteen.getAverageRating(),
                 Integer.valueOf(((MaterialTextView)rootView.findViewById(R.id.txvAvgWaitingVal)).getText().toString().replace(" min", ""))
         );
+    }
+
+    private void clearFocusInView() {
+        rootView.findViewById(R.id.edtCanteenName).clearFocus();
+        rootView.findViewById(R.id.edtMenu).clearFocus();
+        rootView.findViewById(R.id.edtMenuPrice).clearFocus();
+        rootView.findViewById(R.id.edtAddress).clearFocus();
+        rootView.findViewById(R.id.edtWebsite).clearFocus();
+        rootView.findViewById(R.id.edtPhoneNumber).clearFocus();
+        rootView.findViewById(R.id.txvAvgWaitingVal).clearFocus();
     }
 }

@@ -38,12 +38,12 @@ public class ServiceProxy {
     }
 
     public Canteen getAdminCanteen(String authToken) throws IOException {
-        ProxyNewCanteen canteen = proxy.getAdminCanteen(String.format("Bearer %s", authToken)).execute().body();
+        ProxyCanteen canteen = proxy.getAdminCanteen(String.format("Bearer %s", authToken)).execute().body();
         return canteen != null ? canteen.toCanteen() : null;
     }
 
     public String updateAdminCanteen(String authToken, Canteen canteen) throws IOException {
-        proxy.putAdminCanteen(String.format("Bearer %s", authToken), new ProxyNewCanteen(canteen)).execute().body();
+        proxy.putAdminCanteen(String.format("Bearer %s", authToken), new ProxyCanteen(canteen)).execute().body();
         return "Successful";
     }
 
@@ -62,10 +62,10 @@ public class ServiceProxy {
         Call<String> postLogin(@Body ProxyLogin login);
 
         @GET("/Admin/Canteen")
-        Call<ProxyNewCanteen> getAdminCanteen(@Header("Authorization") String authenticationToken);
+        Call<ProxyCanteen> getAdminCanteen(@Header("Authorization") String authenticationToken);
 
         @PUT("/Admin/Canteen")
-        Call<Void> putAdminCanteen(@Header("Authorization") String authenticationToken, @Body ProxyNewCanteen canteen);
+        Call<Void> putAdminCanteen(@Header("Authorization") String authenticationToken, @Body ProxyCanteen canteen);
 
         //@POST("/Admin/Canteen/Rating")
         //Call<ProxyRating> postRating(@Header("Authorization") String authenticationToken, @Body ProxyNewRating rating);
@@ -84,10 +84,6 @@ public class ServiceProxy {
     }
 
     private static class ProxyCanteen {
-        int canteenId;
-    }
-
-    private static class ProxyNewCanteen {
         final int canteenId;
         final String name;
         final String meal;
@@ -98,7 +94,7 @@ public class ServiceProxy {
         final float averageRating;
         final int averageWaitingTime;
 
-        ProxyNewCanteen(Canteen canteen) {
+        ProxyCanteen(Canteen canteen) {
             this.canteenId = Integer.parseInt(canteen.getId());
             this.name = canteen.getName();
             this.phone = canteen.getPhoneNumber();

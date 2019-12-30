@@ -58,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
                         if(authToken != null) {
                             CanteenManagerApplication.getInstance().setAuthToken(authToken);
                             setResult(RESULT_OK);
-                            //Start CanteenActivity
+                            //Start MainActivity
                             finish();
                         } else {
                             //reset password field
