@@ -4,15 +4,17 @@ public class Canteen {
 
     private final String id;
     private final String name;
-    private final String phoneNumber;
-    private final String website;
     private final String setMeal;
     private final float setMealPrice;
-    private final float averageRating;
     private final String location;
+    private final String website;
+    private final String phoneNumber;
+    private final float averageRating;
     private final int averageWaitingTime;
 
-    public Canteen(String id, String name, String phoneNumber, String website, String setMeal, float setMealPrice, float averageRating, String location, int averageWaitingTime) {
+    public Canteen(String id, String name, String setMeal, float setMealPrice,
+                   String location, String website, String phoneNumber,
+                   float averageRating,  int averageWaitingTime) {
         this.id = id;
         this.name = name;
         this.phoneNumber = phoneNumber;

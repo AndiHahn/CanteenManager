@@ -1,5 +1,8 @@
 package com.example.canteenchecker.canteenmanager.proxy;
 
+import android.util.Log;
+
+import com.example.canteenchecker.canteenmanager.CanteenManagerApplication;
 import com.example.canteenchecker.canteenmanager.core.Canteen;
 
 import java.io.IOException;
@@ -13,6 +16,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -33,6 +37,16 @@ public class ServiceProxy {
         return proxy.postLogin(new ProxyLogin(userName, password)).execute().body();
     }
 
+    public Canteen getAdminCanteen(String authToken) throws IOException {
+        ProxyNewCanteen canteen = proxy.getAdminCanteen(String.format("Bearer %s", authToken)).execute().body();
+        return canteen != null ? canteen.toCanteen() : null;
+    }
+
+    public String updateAdminCanteen(String authToken, Canteen canteen) throws IOException {
+        proxy.putAdminCanteen(String.format("Bearer %s", authToken), new ProxyNewCanteen(canteen)).execute().body();
+        return "Successful";
+    }
+
     private interface Proxy {
 
         //@GET("/Public/Canteen")
@@ -46,6 +60,12 @@ public class ServiceProxy {
 
         @POST("/Admin/Login")
         Call<String> postLogin(@Body ProxyLogin login);
+
+        @GET("/Admin/Canteen")
+        Call<ProxyNewCanteen> getAdminCanteen(@Header("Authorization") String authenticationToken);
+
+        @PUT("/Admin/Canteen")
+        Call<Void> putAdminCanteen(@Header("Authorization") String authenticationToken, @Body ProxyNewCanteen canteen);
 
         //@POST("/Admin/Canteen/Rating")
         //Call<ProxyRating> postRating(@Header("Authorization") String authenticationToken, @Body ProxyNewRating rating);
@@ -61,5 +81,52 @@ public class ServiceProxy {
             this.username = userName;
             this.password = password;
         }
+    }
+
+    private static class ProxyCanteen {
+        int canteenId;
+    }
+
+    private static class ProxyNewCanteen {
+        final int canteenId;
+        final String name;
+        final String meal;
+        final float mealPrice;
+        final String address;
+        final String website;
+        final String phone;
+        final float averageRating;
+        final int averageWaitingTime;
+
+        ProxyNewCanteen(Canteen canteen) {
+            this.canteenId = Integer.parseInt(canteen.getId());
+            this.name = canteen.getName();
+            this.phone = canteen.getPhoneNumber();
+            this.website = canteen.getWebsite();
+            this.meal = canteen.getSetMeal();
+            this.mealPrice = canteen.getSetMealPrice();
+            this.averageRating = canteen.getAverageRating();
+            this.address = canteen.getLocation();
+            this.averageWaitingTime = canteen.getAverageWaitingTime();
+
+            /*
+            Log.e("FUD", String.valueOf(this.canteenId));
+            Log.e("FUD", this.name);
+            Log.e("FUD", this.phone);
+            Log.e("FUD", this.website);
+            Log.e("FUD", this.meal);
+            Log.e("FUD", String.valueOf(this.mealPrice));
+            Log.e("FUD", String.valueOf(this.averageRating));
+            Log.e("FUD", this.address);
+            Log.e("FUD", String.valueOf(this.averageWaitingTime));
+
+             */
+        }
+
+        Canteen toCanteen() {
+            return new Canteen(String.valueOf(canteenId), name, meal, mealPrice, address,
+                               website, phone, averageRating, averageWaitingTime);
+        }
+
     }
 }
