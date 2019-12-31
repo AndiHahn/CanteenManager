@@ -2,27 +2,27 @@ package com.example.canteenchecker.canteenmanager.core;
 
 public class Rating {
 
-    private final int id;
-    private final String userName;
+    private final int ratingId;
+    private final String username;
     private final String remark;
     private final int ratingPoints;
     private final long timestamp;
 
-    public Rating(int id, String userName, String remark,
+    public Rating(int ratingId, String username, String remark,
                   int ratingPoints, long timestamp) {
-        this.id = id;
-        this.userName = userName;
+        this.ratingId = ratingId;
+        this.username = username;
         this.remark = remark;
         this.ratingPoints = ratingPoints;
         this.timestamp = timestamp;
     }
 
     public int getId() {
-        return id;
+        return ratingId;
     }
 
     public String getUserName() {
-        return userName;
+        return username;
     }
 
     public String getRemark() {

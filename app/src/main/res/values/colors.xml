@@ -21,4 +21,10 @@
     <color name="colorOnBackground">#000000</color>
 
     <color name="white">#FFFFFF</color>
+
+    <color name="ratingsFive">#009900</color>
+    <color name="ratingsFour">#66CC00</color>
+    <color name="ratingsThree">#CCCC00</color>
+    <color name="ratingsTwo">#CC6600</color>
+    <color name="ratingsOne">#990000</color>
 </resources>

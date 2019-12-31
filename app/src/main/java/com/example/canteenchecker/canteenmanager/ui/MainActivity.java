@@ -19,6 +19,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        viewPager = findViewById(R.id.viewPager);
+        tabLayout = findViewById(R.id.tabLayout);
+        adapter = new TabAdapter(getSupportFragmentManager());
+        adapter.addFragment(new CanteenFragment(), "Canteen");
+        adapter.addFragment(new ReviewsFragment(), "Reviews");
+
     }
 
     @Override
@@ -29,11 +36,6 @@ public class MainActivity extends AppCompatActivity {
         if (!CanteenManagerApplication.getInstance().isAuthenticated()) {
             startActivity(LoginActivity.createIntent(getBaseContext()));
         } else {
-            viewPager = findViewById(R.id.viewPager);
-            tabLayout = findViewById(R.id.tabLayout);
-            adapter = new TabAdapter(getSupportFragmentManager());
-            adapter.addFragment(new CanteenFragment(), "Canteen");
-            adapter.addFragment(new ReviewsFragment(), "Reviews");
             viewPager.setAdapter(adapter);
             tabLayout.setupWithViewPager(viewPager);
         }

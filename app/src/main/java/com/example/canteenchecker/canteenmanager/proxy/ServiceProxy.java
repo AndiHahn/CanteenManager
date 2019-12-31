@@ -5,6 +5,7 @@ import android.util.Log;
 import com.example.canteenchecker.canteenmanager.CanteenManagerApplication;
 import com.example.canteenchecker.canteenmanager.core.Canteen;
 import com.example.canteenchecker.canteenmanager.core.Rating;
+import com.example.canteenchecker.canteenmanager.core.ReviewData;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,6 +49,11 @@ public class ServiceProxy {
         return "Successful";
     }
 
+    public ReviewData getReviewsDataForCanteen(String canteenId) throws IOException {
+        ProxyReviewData reviewData = proxy.getReviewDataForCanteen(canteenId).execute().body();
+        return reviewData != null ? reviewData.toReviewData() : null;
+    }
+
     private interface Proxy {
 
         //@GET("/Public/Canteen")
@@ -67,6 +73,9 @@ public class ServiceProxy {
 
         @PUT("/Admin/Canteen")
         Call<Void> putAdminCanteen(@Header("Authorization") String authenticationToken, @Body ProxyCanteen canteen);
+
+        @GET("/Public/Canteen/{id}/Rating?nrOfRatings=0")
+        Call<ProxyReviewData> getReviewDataForCanteen(@Path("id") String canteenId);
 
         //@POST("/Admin/Canteen/Rating")
         //Call<ProxyRating> postRating(@Header("Authorization") String authenticationToken, @Body ProxyNewRating rating);
@@ -113,5 +122,22 @@ public class ServiceProxy {
             return new Canteen(String.valueOf(canteenId), name, meal, mealPrice, address,
                                website, phone, averageRating, averageWaitingTime, ratings);
         }
+    }
+
+    private static class ProxyReviewData {
+
+        float average;
+        int totalCount;
+        int[] countsPerGrade;
+
+        private int getRatingsForGrade(int grade) {
+            grade--;
+            return countsPerGrade != null && grade >= 0 && grade < countsPerGrade.length ? countsPerGrade[grade] : 0;
+        }
+
+        ReviewData toReviewData() {
+            return new ReviewData(average, totalCount, getRatingsForGrade(1), getRatingsForGrade(2), getRatingsForGrade(3), getRatingsForGrade(4), getRatingsForGrade(5));
+        }
+
     }
 }

@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatRatingBar;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import android.content.pm.PackageManager;
+
 
 public class ReviewsFragment extends Fragment {
 
@@ -41,8 +45,7 @@ public class ReviewsFragment extends Fragment {
     private RecyclerView rcvReviews;
     private ReviewsAdapter reviewsAdapter = new ReviewsAdapter();
 
-    //Canteen
-    private Canteen canteen = null;
+
     private Context context;
 
     public ReviewsFragment() {
@@ -52,7 +55,6 @@ public class ReviewsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -68,6 +70,7 @@ public class ReviewsFragment extends Fragment {
         rcvReviews.setLayoutManager(new LinearLayoutManager(inflater.getContext()));
         rcvReviews.setAdapter(reviewsAdapter);
 
+        Log.e(TAG, "onCreateView() ReviewsFragment");
         getReviews();
 
         // Inflate the layout for this fragment
@@ -98,8 +101,6 @@ public class ReviewsFragment extends Fragment {
                     Log.e(TAG, "Canteen == null");
                 }
 
-                ReviewsFragment.this.canteen = canteen;
-
                 //refresh Reviews
                 reviewsAdapter.displayRatings(canteen.getRatings());
             }
@@ -112,17 +113,17 @@ public class ReviewsFragment extends Fragment {
 
             private final TextView txvUsername = itemView.findViewById(R.id.txvUsername);
             private final TextView txvRemark = itemView.findViewById(R.id.txvRemark);
-            private final TextView txvRatingPoints = itemView.findViewById(R.id.txvRatingPoints);
+            private final AppCompatRatingBar rtbRating = itemView.findViewById(R.id.rtbRating);
+            private final Button btnDustbin = itemView.findViewById(R.id.btnDustbin);
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
             }
 
             void updateView(final Rating rating) {
-                Log.e(TAG, "Username: " + rating.getUserName());
                 txvUsername.setText("User: " + rating.getUserName());
+                rtbRating.setRating(rating.getRatingPoints());
                 txvRemark.setText("Remark: " + rating.getRemark());
-                txvRatingPoints.setText(String.valueOf(rating.getRatingPoints()));
 
                 /*
                 itemView.setOnClickListener(new View.OnClickListener() {
