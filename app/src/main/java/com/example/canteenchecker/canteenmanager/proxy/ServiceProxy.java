@@ -15,6 +15,7 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
@@ -45,13 +46,18 @@ public class ServiceProxy {
     }
 
     public String updateAdminCanteen(String authToken, Canteen canteen) throws IOException {
-        proxy.putAdminCanteen(String.format("Bearer %s", authToken), new ProxyCanteen(canteen)).execute().body();
+        proxy.putAdminCanteen(String.format("Bearer %s", authToken), new ProxyCanteen(canteen)).execute();
         return "Successful";
     }
 
     public ReviewData getReviewsDataForCanteen(String canteenId) throws IOException {
         ProxyReviewData reviewData = proxy.getReviewDataForCanteen(canteenId).execute().body();
         return reviewData != null ? reviewData.toReviewData() : null;
+    }
+
+    public String deleteRating(String ratingId, String authToken) throws IOException {
+        proxy.deleteRating(String.format("Bearer %s", authToken), ratingId).execute();
+        return "Successful";
     }
 
     private interface Proxy {
@@ -76,6 +82,9 @@ public class ServiceProxy {
 
         @GET("/Public/Canteen/{id}/Rating?nrOfRatings=0")
         Call<ProxyReviewData> getReviewDataForCanteen(@Path("id") String canteenId);
+
+        @DELETE("/Admin/Canteen/Rating/{ratingId}")
+        Call<Void> deleteRating(@Header("Authorization") String authenticationToken, @Path("ratingId") String ratingId);
 
         //@POST("/Admin/Canteen/Rating")
         //Call<ProxyRating> postRating(@Header("Authorization") String authenticationToken, @Body ProxyNewRating rating);

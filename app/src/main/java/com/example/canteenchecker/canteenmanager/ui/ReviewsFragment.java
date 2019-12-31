@@ -70,14 +70,13 @@ public class ReviewsFragment extends Fragment {
         rcvReviews.setLayoutManager(new LinearLayoutManager(inflater.getContext()));
         rcvReviews.setAdapter(reviewsAdapter);
 
-        Log.e(TAG, "onCreateView() ReviewsFragment");
-        getReviews();
+        updateReviews();
 
         // Inflate the layout for this fragment
         return rootView;
     }
 
-    private void getReviews() {
+    public void updateReviews() {
         new AsyncTask<Void, Void, Canteen>() {
             @Override
             protected Canteen doInBackground(Void... voids) {
@@ -97,7 +96,7 @@ public class ReviewsFragment extends Fragment {
                     } else {
                         Log.e(TAG, "Canteen.getRationgs() == null");
                     }
-                                    } else {
+                } else {
                     Log.e(TAG, "Canteen == null");
                 }
 
@@ -124,6 +123,7 @@ public class ReviewsFragment extends Fragment {
                 txvUsername.setText("User: " + rating.getUserName());
                 rtbRating.setRating(rating.getRatingPoints());
                 txvRemark.setText("Remark: " + rating.getRemark());
+                btnDustbin.setOnClickListener(v -> deleteRating(rating.getId()));
 
                 /*
                 itemView.setOnClickListener(new View.OnClickListener() {
@@ -136,9 +136,32 @@ public class ReviewsFragment extends Fragment {
                 });
                  */
             }
+
+            private void deleteRating(int ratingId) {
+                new AsyncTask<String, Void, String>() {
+                    @Override
+                    protected String doInBackground(String... params) {
+                        try {
+                            Log.e(TAG, String.format("Delete canteen with id %s", params[0]));
+                            return new ServiceProxy().deleteRating(params[0], CanteenManagerApplication.getInstance().getAuthToken());
+                        } catch (IOException e) {
+
+                            Log.e(TAG, String.format("Failed to delete review with id %s", params[0]), e);
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(String s) {
+                        //removeSingleRating(Integer.valueOf(s));
+                        Log.e(TAG, "Successfully deleted rating");
+                    }
+                }.execute(String.valueOf(ratingId));
+            }
         }
 
-        private final List<Rating> ratingList = new ArrayList<>();
+        private static final List<Rating> ratingList = new ArrayList<>();
+        private static Rating deletedRating;
 
         void displayRatings(Rating[] ratings) {
             ratingList.clear();
@@ -147,6 +170,25 @@ public class ReviewsFragment extends Fragment {
             }
             notifyDataSetChanged();
         }
+
+        /*
+        void removeSingleRating(int ratingId) {
+            int indexDelRating = -1;
+            for(Rating r : ratingList) {
+                indexDelRating++;
+                if (r.getId() == ratingId) {
+                    deletedRating = r;
+                }
+            }
+
+            if (indexDelRating >= 0) {
+                ratingList.remove(indexDelRating);
+            }
+
+            notifyDataSetChanged();
+        }
+
+         */
 
         @NonNull
         @Override
