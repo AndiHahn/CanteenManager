@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.canteenchecker.canteenmanager">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".CanteenManagerApplication"
         android:allowBackup="true"
@@ -10,6 +12,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/MyTheme">
+
+        <service
+            android:name=".service.MyFirebaseMessagingService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <activity android:name=".ui.LoginActivity"></activity>
         <activity android:name=".ui.MainActivity">

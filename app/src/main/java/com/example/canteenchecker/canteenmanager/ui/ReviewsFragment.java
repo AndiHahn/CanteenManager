@@ -1,15 +1,16 @@
 package com.example.canteenchecker.canteenmanager.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatRatingBar;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,15 +32,13 @@ import com.example.canteenchecker.canteenmanager.core.Canteen;
 import com.example.canteenchecker.canteenmanager.core.Rating;
 import com.example.canteenchecker.canteenmanager.core.ReviewData;
 import com.example.canteenchecker.canteenmanager.proxy.ServiceProxy;
+import com.example.canteenchecker.canteenmanager.service.MyFirebaseMessagingService;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
-import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import android.content.pm.PackageManager;
 
 public class ReviewsFragment extends Fragment {
 
@@ -64,9 +63,23 @@ public class ReviewsFragment extends Fragment {
 
     private Context context;
 
+    private Canteen canteen;
+
     public ReviewsFragment() {
         // Required empty public constructor
     }
+
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ReviewsFragment.this.canteen != null) {
+                String canteenId = canteen.getId();
+                if (canteenId != null && canteenId.equals(MyFirebaseMessagingService.extractCanteenId(intent))) {
+                    updateReviews();
+                }
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -105,8 +118,13 @@ public class ReviewsFragment extends Fragment {
         srlSwipeRefreshLayout = rootView.findViewById(R.id.srlSwipeRefreshLayout);
         srlSwipeRefreshLayout.setOnRefreshListener(() -> updateReviews());
 
-        //add reviews fragment dynamically
-        Log.e(TAG, "onCreateView()");
+        //push notifications
+        if (getActivity() != null) {
+            LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, MyFirebaseMessagingService.createCanteenChangedIntentFilter());
+        } else {
+            Log.e(TAG, "Could not register BroadcastReceiver in ReviewsFragment!");
+        }
+
         // Inflate the layout for this fragment
         return rootView;
     }
@@ -148,7 +166,6 @@ public class ReviewsFragment extends Fragment {
                             @Override
                             protected String doInBackground(String... params) {
                                 try {
-                                    Log.e(TAG, String.format("Delete canteen with id %s", params[0]));
                                     return new ServiceProxy().deleteRating(params[0], CanteenManagerApplication.getInstance().getAuthToken());
                                 } catch (IOException e) {
                                     Log.e(TAG, String.format("Failed to delete review with id %s", params[0]), e);
@@ -206,6 +223,7 @@ public class ReviewsFragment extends Fragment {
             protected void onPostExecute(Canteen canteen) {
                 srlSwipeRefreshLayout.setRefreshing(false);
                 if (canteen != null) {
+                    ReviewsFragment.this.canteen = canteen;
                     updateStatistics(canteen.getId());
 
                     if (canteen.getRatings() != null) {

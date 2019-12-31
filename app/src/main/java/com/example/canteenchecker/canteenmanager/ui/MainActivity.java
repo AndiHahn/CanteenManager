@@ -1,12 +1,18 @@
 package com.example.canteenchecker.canteenmanager.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.ViewPager;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.canteenchecker.canteenmanager.CanteenManagerApplication;
 import com.example.canteenchecker.canteenmanager.R;
+import com.example.canteenchecker.canteenmanager.service.MyFirebaseMessagingService;
 import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
@@ -25,7 +31,6 @@ public class MainActivity extends AppCompatActivity {
         adapter = new TabAdapter(getSupportFragmentManager());
         adapter.addFragment(new CanteenFragment(), "Canteen");
         adapter.addFragment(new ReviewsFragment(), "Reviews");
-
     }
 
     @Override
