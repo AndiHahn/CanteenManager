@@ -1,10 +1,12 @@
 package com.example.canteenchecker.canteenmanager.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.fragment.app.Fragment;
 
@@ -26,10 +28,13 @@ import com.google.android.material.textview.MaterialTextView;
 import java.io.IOException;
 import java.text.NumberFormat;
 
+import static android.app.Activity.RESULT_OK;
+
 public class CanteenFragment extends Fragment {
 
     //constants
     private static final String TAG = "CanteenFragment";
+    static final int PICK_CONTACT_REQUEST = 1;  // The request code
 
     //layout
     private View rootView;
@@ -42,11 +47,13 @@ public class CanteenFragment extends Fragment {
     private TextInputEditText edtPhoneNumber;
     private AppCompatSeekBar skbAvgWaitingTime;
     private MaterialTextView txvAvgWaitingVal;
+    private Button btnOpenMap;
 
     private Button btnSave;
 
     //Canteen
     private Canteen canteen = null;
+    private boolean canteenIsLoaded = false;
 
     public CanteenFragment() {
         // Required empty public constructor
@@ -69,19 +76,43 @@ public class CanteenFragment extends Fragment {
         edtAddress = rootView.findViewById(R.id.edtAddress);
         edtWebsite = rootView.findViewById(R.id.edtWebsite);
         edtPhoneNumber = rootView.findViewById(R.id.edtPhoneNumber);
-
         skbAvgWaitingTime = rootView.findViewById(R.id.skbAvgWaitingTime);
         txvAvgWaitingVal = rootView.findViewById(R.id.txvAvgWaitingVal);
+
+        //Map Button
+        btnOpenMap = rootView.findViewById(R.id.btnOpenMap);
+        btnOpenMap.setOnClickListener(v -> {
+            if (canteen != null) {
+                startActivityForResult(MapActivity.createIntent(v.getContext(), canteen.getLocation()), PICK_CONTACT_REQUEST);
+                //v.getContext().startActivity(MapActivity.createIntent(v.getContext(), canteen.getLocation()));
+            }
+        });
 
         skbAvgWaitingTime.setOnSeekBarChangeListener(new CanteenFragment.SeekbarListener());
 
         btnSave = rootView.findViewById(R.id.btnSave);
         btnSave.setOnClickListener(v -> saveCanteen());
 
-        updateCanteen();
+        if (!canteenIsLoaded) {
+            canteenIsLoaded = true;
+            updateCanteen();
+        }
 
         // Inflate the layout for this fragment
         return rootView;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_CONTACT_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                String result = data.getStringExtra(MapActivity.ADDRESS_KEY);
+                this.canteen.setLocation(result);
+                edtAddress.setText(canteen.getLocation());
+            }
+        }
     }
 
     private class SeekbarListener implements SeekBar.OnSeekBarChangeListener {
@@ -115,14 +146,7 @@ public class CanteenFragment extends Fragment {
 
                 //update UI
                 if (canteen != null) {
-                    edtCanteenName.setText(canteen.getName());
-                    edtMenu.setText(canteen.getSetMeal());
-                    edtMenuPrice.setText(NumberFormat.getCurrencyInstance().format(canteen.getSetMealPrice()));
-                    edtAddress.setText(canteen.getLocation());
-                    edtWebsite.setText(canteen.getWebsite());
-                    edtPhoneNumber.setText(canteen.getPhoneNumber());
-                    skbAvgWaitingTime.setProgress(canteen.getAverageWaitingTime());
-                    txvAvgWaitingVal.setText(canteen.getAverageWaitingTime() + " min");
+                    updateCanteenDetailsInView(canteen);
                 }
             }
         }.execute();
@@ -163,6 +187,17 @@ public class CanteenFragment extends Fragment {
                 Integer.valueOf(((MaterialTextView)rootView.findViewById(R.id.txvAvgWaitingVal)).getText().toString().replace(" min", "")),
                 null
         );
+    }
+
+    private void updateCanteenDetailsInView(Canteen canteen) {
+        edtCanteenName.setText(canteen.getName());
+        edtMenu.setText(canteen.getSetMeal());
+        edtMenuPrice.setText(NumberFormat.getCurrencyInstance().format(canteen.getSetMealPrice()));
+        edtAddress.setText(canteen.getLocation());
+        edtWebsite.setText(canteen.getWebsite());
+        edtPhoneNumber.setText(canteen.getPhoneNumber());
+        skbAvgWaitingTime.setProgress(canteen.getAverageWaitingTime());
+        txvAvgWaitingVal.setText(canteen.getAverageWaitingTime() + " min");
     }
 
     private void clearFocusInView() {

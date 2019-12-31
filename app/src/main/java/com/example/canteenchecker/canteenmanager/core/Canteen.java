@@ -6,7 +6,7 @@ public class Canteen {
     private final String name;
     private final String setMeal;
     private final float setMealPrice;
-    private final String location;
+    private String location;
     private final String website;
     private final String phoneNumber;
     private final float averageRating;
@@ -67,5 +67,7 @@ public class Canteen {
     public Rating[] getRatings() {
         return ratings;
     }
+
+    public void setLocation(String location) { this.location = location; }
 
 }
