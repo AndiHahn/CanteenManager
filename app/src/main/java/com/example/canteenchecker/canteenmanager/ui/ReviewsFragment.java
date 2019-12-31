@@ -1,20 +1,26 @@
 package com.example.canteenchecker.canteenmanager.ui;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatRatingBar;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,16 +29,17 @@ import com.example.canteenchecker.canteenmanager.CanteenManagerApplication;
 import com.example.canteenchecker.canteenmanager.R;
 import com.example.canteenchecker.canteenmanager.core.Canteen;
 import com.example.canteenchecker.canteenmanager.core.Rating;
+import com.example.canteenchecker.canteenmanager.core.ReviewData;
 import com.example.canteenchecker.canteenmanager.proxy.ServiceProxy;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
+import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
 import android.content.pm.PackageManager;
-
 
 public class ReviewsFragment extends Fragment {
 
@@ -40,11 +47,20 @@ public class ReviewsFragment extends Fragment {
     private static final String TAG = "ReviewsFragment";
 
     //layout
+    private TextView txvAverageRating;
+    private TextView txvTotalRatings;
+    private RatingBar rtbAverageRating;
+    private View viwRatingOne;
+    private View viwRatingTwo;
+    private View viwRatingThree;
+    private View viwRatingFour;
+    private View viwRatingFive;
+
     private View rootView;
 
     private RecyclerView rcvReviews;
     private ReviewsAdapter reviewsAdapter = new ReviewsAdapter();
-
+    private SwipeRefreshLayout srlSwipeRefreshLayout;
 
     private Context context;
 
@@ -55,6 +71,8 @@ public class ReviewsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        updateReviews();
     }
 
     @Override
@@ -64,16 +82,112 @@ public class ReviewsFragment extends Fragment {
         rootView = inflater.inflate(R.layout.fragment_reviews, container, false);
 
         //layout
+        txvAverageRating = rootView.findViewById(R.id.txvAverageRating);
+        txvTotalRatings = rootView.findViewById(R.id.txvTotalRatings);
+        rtbAverageRating = rootView.findViewById(R.id.rtbAverageRating);
+        viwRatingOne = rootView.findViewById(R.id.viwRatingsOne);
+        viwRatingTwo = rootView.findViewById(R.id.viwRatingsTwo);
+        viwRatingThree = rootView.findViewById(R.id.viwRatingsThree);
+        viwRatingFour = rootView.findViewById(R.id.viwRatingsFour);
+        viwRatingFive = rootView.findViewById(R.id.viwRatingsFive);
+
         //recycler View
         rcvReviews = rootView.findViewById(R.id.rcvReviews);
         context = inflater.getContext();
         rcvReviews.setLayoutManager(new LinearLayoutManager(inflater.getContext()));
         rcvReviews.setAdapter(reviewsAdapter);
 
-        updateReviews();
+        ItemTouchHelper itemTouchHelper = new
+                ItemTouchHelper(new SwipeToDeleteCallback());
+        itemTouchHelper.attachToRecyclerView(rcvReviews);
 
+        //swipe to refresh layout
+        srlSwipeRefreshLayout = rootView.findViewById(R.id.srlSwipeRefreshLayout);
+        srlSwipeRefreshLayout.setOnRefreshListener(() -> updateReviews());
+
+        //add reviews fragment dynamically
+        Log.e(TAG, "onCreateView()");
         // Inflate the layout for this fragment
         return rootView;
+    }
+
+    public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
+
+        public SwipeToDeleteCallback() {
+            super(0, ItemTouchHelper.LEFT);
+
+        }
+
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+            int position = viewHolder.getAdapterPosition();
+            View itemView = viewHolder.itemView;
+            Button btnDustbin = itemView.findViewById(R.id.btnDustbin);
+            btnDustbin.setVisibility(View.INVISIBLE);
+
+            Rating rating = reviewsAdapter.getRatingOnPos(position);
+            reviewsAdapter.removeSingleRating(position);
+
+            Snackbar snackbar = Snackbar
+                    .make(srlSwipeRefreshLayout, "Rating deleted", Snackbar.LENGTH_LONG);
+
+            snackbar.setAction("UNDO", (v) -> {
+                btnDustbin.setVisibility(View.INVISIBLE);
+                reviewsAdapter.restoreDeletedItem(position);
+                btnDustbin.setVisibility(View.INVISIBLE);
+            });
+
+            snackbar.addCallback(new Snackbar.Callback() {
+                @Override
+                public void onDismissed(Snackbar transientBottomBar, int event) {
+                    super.onDismissed(transientBottomBar, event);
+
+                    if (event == Snackbar.Callback.DISMISS_EVENT_TIMEOUT) {
+                        // Snackbar closed on its own
+                        new AsyncTask<String, Void, String>() {
+                            @Override
+                            protected String doInBackground(String... params) {
+                                try {
+                                    Log.e(TAG, String.format("Delete canteen with id %s", params[0]));
+                                    return new ServiceProxy().deleteRating(params[0], CanteenManagerApplication.getInstance().getAuthToken());
+                                } catch (IOException e) {
+                                    Log.e(TAG, String.format("Failed to delete review with id %s", params[0]), e);
+                                }
+                                return null;
+                            }
+
+                            @Override
+                            protected void onPostExecute(String s) {
+                                Toast.makeText(getActivity(), "Deleted Rating", Toast.LENGTH_SHORT).show();
+                            }
+                        }.execute(String.valueOf(rating.getId()));
+                    }
+                }
+            });
+            snackbar.show();
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            super.onChildDraw(c, recyclerView, viewHolder, dX,
+                    dY, actionState, isCurrentlyActive);
+
+            View itemView = viewHolder.itemView;
+            Button btnDustbin = itemView.findViewById(R.id.btnDustbin);
+
+            if (dX < 0) { // Swiping to the left
+                btnDustbin.setVisibility(View.VISIBLE);
+            } else { // view is unSwiped
+                btnDustbin.setVisibility(View.INVISIBLE);
+            }
+
+            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+        }
     }
 
     public void updateReviews() {
@@ -90,7 +204,10 @@ public class ReviewsFragment extends Fragment {
 
             @Override
             protected void onPostExecute(Canteen canteen) {
+                srlSwipeRefreshLayout.setRefreshing(false);
                 if (canteen != null) {
+                    updateStatistics(canteen.getId());
+
                     if (canteen.getRatings() != null) {
                         Log.e(TAG, "Loaded: " + canteen.getRatings().length + " ratings");
                     } else {
@@ -113,7 +230,6 @@ public class ReviewsFragment extends Fragment {
             private final TextView txvUsername = itemView.findViewById(R.id.txvUsername);
             private final TextView txvRemark = itemView.findViewById(R.id.txvRemark);
             private final AppCompatRatingBar rtbRating = itemView.findViewById(R.id.rtbRating);
-            private final Button btnDustbin = itemView.findViewById(R.id.btnDustbin);
 
             public ViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -123,40 +239,6 @@ public class ReviewsFragment extends Fragment {
                 txvUsername.setText("User: " + rating.getUserName());
                 rtbRating.setRating(rating.getRatingPoints());
                 txvRemark.setText("Remark: " + rating.getRemark());
-                btnDustbin.setOnClickListener(v -> deleteRating(rating.getId()));
-
-                /*
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // TODO: open canteen details activity
-                        itemView.getContext().startActivity(CanteenDetailsActivity.createIntent(itemView.getContext(), canteen.getId()));
-
-                    }
-                });
-                 */
-            }
-
-            private void deleteRating(int ratingId) {
-                new AsyncTask<String, Void, String>() {
-                    @Override
-                    protected String doInBackground(String... params) {
-                        try {
-                            Log.e(TAG, String.format("Delete canteen with id %s", params[0]));
-                            return new ServiceProxy().deleteRating(params[0], CanteenManagerApplication.getInstance().getAuthToken());
-                        } catch (IOException e) {
-
-                            Log.e(TAG, String.format("Failed to delete review with id %s", params[0]), e);
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(String s) {
-                        //removeSingleRating(Integer.valueOf(s));
-                        Log.e(TAG, "Successfully deleted rating");
-                    }
-                }.execute(String.valueOf(ratingId));
             }
         }
 
@@ -165,30 +247,31 @@ public class ReviewsFragment extends Fragment {
 
         void displayRatings(Rating[] ratings) {
             ratingList.clear();
-            for(int i = 0; i < ratings.length; i++) {
-                ratingList.add(ratings[i]);
-            }
-            notifyDataSetChanged();
-        }
-
-        /*
-        void removeSingleRating(int ratingId) {
-            int indexDelRating = -1;
-            for(Rating r : ratingList) {
-                indexDelRating++;
-                if (r.getId() == ratingId) {
-                    deletedRating = r;
+            if (ratings != null) {
+                for(int i = 0; i < ratings.length; i++) {
+                    ratingList.add(ratings[i]);
                 }
+                notifyDataSetChanged();
             }
+        }
 
-            if (indexDelRating >= 0) {
-                ratingList.remove(indexDelRating);
-            }
-
+        void removeSingleRating(int ratingPos) {
+            deletedRating = ratingList.get(ratingPos);
+            ratingList.remove(ratingPos);
             notifyDataSetChanged();
         }
 
-         */
+        void restoreDeletedItem(int ratingPos) {
+            ratingList.add(ratingPos, deletedRating);
+            notifyDataSetChanged();
+        }
+
+        Rating getRatingOnPos(int position) {
+            if (position <= ratingList.size()) {
+                return ratingList.get(position);
+            }
+            return null;
+        }
 
         @NonNull
         @Override
@@ -206,5 +289,51 @@ public class ReviewsFragment extends Fragment {
         public int getItemCount() {
             return ratingList.size();
         }
+    }
+
+    private void updateStatistics(String canteenId) {
+        new AsyncTask<String, Void, ReviewData>() {
+
+            @Override
+            protected ReviewData doInBackground(String... params) {
+                try {
+                    return new ServiceProxy().getReviewsDataForCanteen(params[0]);
+                } catch (IOException e) {
+                    Log.e(TAG, String.format("Downloading of reviews of canteen with id %s failed.", params[0]), e);
+                    return null;
+                }
+            }
+
+            @Override
+            protected void onPostExecute(ReviewData reviewData) {
+                if(reviewData != null) {
+                    txvAverageRating.setText(NumberFormat.getNumberInstance().format(reviewData.getAverageRating()));
+                    txvTotalRatings.setText(NumberFormat.getNumberInstance().format(reviewData.getTotalRatings()));
+                    rtbAverageRating.setRating(reviewData.getAverageRating());
+                    setWeight(viwRatingOne, reviewData.getRatingsOne(), reviewData.getTotalRatingsOfMostCommonGrade());
+                    setWeight(viwRatingTwo, reviewData.getRatingsTwo(), reviewData.getTotalRatingsOfMostCommonGrade());
+                    setWeight(viwRatingThree, reviewData.getRatingsThree(), reviewData.getTotalRatingsOfMostCommonGrade());
+                    setWeight(viwRatingFour, reviewData.getRatingsFour(), reviewData.getTotalRatingsOfMostCommonGrade());
+                    setWeight(viwRatingFive, reviewData.getRatingsFive(), reviewData.getTotalRatingsOfMostCommonGrade());
+
+                } else {
+                    txvAverageRating.setText(null);
+                    txvTotalRatings.setText(null);
+                    rtbAverageRating.setRating(0);
+                    setWeight(viwRatingOne, 0, 1);
+                    setWeight(viwRatingTwo, 0, 1);
+                    setWeight(viwRatingThree, 0, 1);
+                    setWeight(viwRatingFour, 0, 1);
+                    setWeight(viwRatingFive, 0, 1);
+                }
+            }
+        }.execute(canteenId);
+    }
+
+    private void setWeight(View view, int value, int maximum) {
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        float weight = ((float)value / maximum);
+        view.setLayoutParams(new LinearLayout.LayoutParams(layoutParams.width, layoutParams.height, weight));
+
     }
 }
