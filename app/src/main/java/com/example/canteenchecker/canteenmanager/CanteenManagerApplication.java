@@ -36,6 +36,8 @@ public class CanteenManagerApplication extends Application {
         this.authToken = authToken;
     }
 
+    public synchronized void deleteAuthToken() { this.authToken = null; }
+
     public synchronized boolean isAuthenticated() {
         return getAuthToken() != null;
     }

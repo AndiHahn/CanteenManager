@@ -122,7 +122,7 @@ public class ReviewsFragment extends Fragment {
         if (getActivity() != null) {
             LocalBroadcastManager.getInstance(getActivity()).registerReceiver(broadcastReceiver, MyFirebaseMessagingService.createCanteenChangedIntentFilter());
         } else {
-            Log.e(TAG, "Could not register BroadcastReceiver in ReviewsFragment!");
+            Log.e(TAG, "Could not register BroadcastReceiver!");
         }
 
         // Inflate the layout for this fragment
@@ -175,7 +175,6 @@ public class ReviewsFragment extends Fragment {
 
                             @Override
                             protected void onPostExecute(String s) {
-                                Toast.makeText(getActivity(), "Deleted Rating", Toast.LENGTH_SHORT).show();
                             }
                         }.execute(String.valueOf(rating.getId()));
                     }
@@ -225,14 +224,6 @@ public class ReviewsFragment extends Fragment {
                 if (canteen != null) {
                     ReviewsFragment.this.canteen = canteen;
                     updateStatistics(canteen.getId());
-
-                    if (canteen.getRatings() != null) {
-                        Log.e(TAG, "Loaded: " + canteen.getRatings().length + " ratings");
-                    } else {
-                        Log.e(TAG, "Canteen.getRationgs() == null");
-                    }
-                } else {
-                    Log.e(TAG, "Canteen == null");
                 }
 
                 //refresh Reviews

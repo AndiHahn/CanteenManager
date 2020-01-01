@@ -171,6 +171,7 @@ public class MapActivity extends AppCompatActivity {
                             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 15));
                         } else {
                             navigateToCurrentLocation();
+                            mapMovedByUser = true;
                         }
 
                         MarkerOptions markerOptions = new MarkerOptions();

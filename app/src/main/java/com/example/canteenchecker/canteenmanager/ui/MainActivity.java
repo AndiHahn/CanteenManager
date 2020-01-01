@@ -1,18 +1,16 @@
 package com.example.canteenchecker.canteenmanager.ui;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.viewpager.widget.ViewPager;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
 
 import com.example.canteenchecker.canteenmanager.CanteenManagerApplication;
 import com.example.canteenchecker.canteenmanager.R;
-import com.example.canteenchecker.canteenmanager.service.MyFirebaseMessagingService;
 import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
 
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
+
         adapter = new TabAdapter(getSupportFragmentManager());
         adapter.addFragment(new CanteenFragment(), "Canteen");
         adapter.addFragment(new ReviewsFragment(), "Reviews");
@@ -43,6 +42,29 @@ public class MainActivity extends AppCompatActivity {
         } else {
             viewPager.setAdapter(adapter);
             tabLayout.setupWithViewPager(viewPager);
+
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_activity_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.mniSignout:
+                signOut();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void signOut() {
+        CanteenManagerApplication.getInstance().deleteAuthToken();
+        startActivity(LoginActivity.createIntent(getBaseContext()));
     }
 }

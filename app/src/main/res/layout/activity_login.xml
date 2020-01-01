@@ -13,7 +13,7 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:src="@drawable/ic_account_circle_150px">
     </androidx.appcompat.widget.AppCompatImageView>
 
@@ -36,6 +36,7 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
         android:hint="@string/password">
 
         <com.google.android.material.textfield.TextInputEditText

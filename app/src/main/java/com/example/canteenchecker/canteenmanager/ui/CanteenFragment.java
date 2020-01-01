@@ -34,7 +34,7 @@ public class CanteenFragment extends Fragment {
 
     //constants
     private static final String TAG = "CanteenFragment";
-    static final int MODIFY_LOCATION_ON_MAP = 1;  // The request code
+    private static final int MODIFY_LOCATION_ON_MAP = 1;  // The request code
 
     //layout
     private View rootView;
@@ -53,7 +53,7 @@ public class CanteenFragment extends Fragment {
 
     //Canteen
     private Canteen canteen = null;
-    private boolean canteenIsLoaded = false;
+    private int loadedCanteen = 0;
 
     public CanteenFragment() {
         // Required empty public constructor
@@ -93,10 +93,7 @@ public class CanteenFragment extends Fragment {
         btnSave = rootView.findViewById(R.id.btnSave);
         btnSave.setOnClickListener(v -> saveCanteen());
 
-        if (!canteenIsLoaded) {
-            canteenIsLoaded = true;
-            updateCanteen();
-        }
+        updateCanteen(true);
 
         // Inflate the layout for this fragment
         return rootView;
@@ -128,7 +125,7 @@ public class CanteenFragment extends Fragment {
         public void onStopTrackingTouch(SeekBar seekBar) {}
     }
 
-    private void updateCanteen() {
+    private void updateCanteen(boolean updateOnlyIfNewCanteen) {
         new AsyncTask<Void, Void, Canteen>() {
             @Override
             protected Canteen doInBackground(Void... voids) {
@@ -144,8 +141,11 @@ public class CanteenFragment extends Fragment {
             protected void onPostExecute(Canteen canteen) {
                 CanteenFragment.this.canteen = canteen;
 
-                //update UI
                 if (canteen != null) {
+                    if (updateOnlyIfNewCanteen && CanteenFragment.this.loadedCanteen == Integer.valueOf(canteen.getId())) {
+                        return;
+                    }
+                    CanteenFragment.this.loadedCanteen = Integer.valueOf(canteen.getId());
                     updateCanteenDetailsInView(canteen);
                 }
             }
@@ -170,7 +170,7 @@ public class CanteenFragment extends Fragment {
             @Override
             protected void onPostExecute(String result) {
                 Toast.makeText(getActivity(), "Canteen successfully stored", Toast.LENGTH_SHORT).show();
-                updateCanteen();
+                updateCanteen(false);
             }
         }.execute(getCanteenDetailsFromView());
     }

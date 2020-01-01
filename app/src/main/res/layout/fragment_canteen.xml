@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -12,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:hint="Canteen Name">
+        android:hint="@string/canteen_name">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtCanteenName"
@@ -34,7 +33,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:hint="Today's Menu"
+            android:hint="@string/today_s_menu"
             app:layout_constraintEnd_toStartOf="@+id/textInputLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -53,7 +52,7 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="Price"
+            android:hint="@string/price"
             android:minWidth="100dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -80,7 +79,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toStartOf="@id/btnOpenMap"
-            android:hint="Address">
+            android:hint="@string/address">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edtAddress"
@@ -113,7 +112,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="Website">
+        android:hint="@string/website">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtWebsite"
@@ -129,7 +128,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:hint="Phone Number">
+        android:hint="@string/phone_number">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edtPhoneNumber"
@@ -149,8 +148,8 @@
             android:id="@+id/test"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Average Waitingtime"
-            android:layout_marginLeft="10dp"
+            android:text="@string/average_waitingtime"
+            android:layout_marginStart="10dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/skbAvgWaitingTime"
@@ -176,7 +175,7 @@
             android:layout_height="wrap_content"
             android:minWidth="70dp"
             android:textAlignment="center"
-            android:textSize="18dp"
+            android:textSize="18sp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -191,6 +190,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:padding="12dp"
-        android:text="Save"/>
+        android:text="@string/save"/>
 
 </LinearLayout>
