@@ -34,7 +34,7 @@ public class CanteenFragment extends Fragment {
 
     //constants
     private static final String TAG = "CanteenFragment";
-    static final int PICK_CONTACT_REQUEST = 1;  // The request code
+    static final int MODIFY_LOCATION_ON_MAP = 1;  // The request code
 
     //layout
     private View rootView;
@@ -83,8 +83,8 @@ public class CanteenFragment extends Fragment {
         btnOpenMap = rootView.findViewById(R.id.btnOpenMap);
         btnOpenMap.setOnClickListener(v -> {
             if (canteen != null) {
-                startActivityForResult(MapActivity.createIntent(v.getContext(), canteen.getLocation()), PICK_CONTACT_REQUEST);
-                //v.getContext().startActivity(MapActivity.createIntent(v.getContext(), canteen.getLocation()));
+                this.canteen.setLocation(edtAddress.getText().toString());
+                startActivityForResult(MapActivity.createIntent(v.getContext(), canteen.getLocation()), MODIFY_LOCATION_ON_MAP);
             }
         });
 
@@ -106,7 +106,7 @@ public class CanteenFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == PICK_CONTACT_REQUEST) {
+        if (requestCode == MODIFY_LOCATION_ON_MAP) {
             if (resultCode == RESULT_OK) {
                 String result = data.getStringExtra(MapActivity.ADDRESS_KEY);
                 this.canteen.setLocation(result);
