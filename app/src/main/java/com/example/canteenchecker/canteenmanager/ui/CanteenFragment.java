@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatSeekBar;
 import androidx.fragment.app.Fragment;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,7 +32,7 @@ import java.text.NumberFormat;
 
 import static android.app.Activity.RESULT_OK;
 
-public class CanteenFragment extends Fragment {
+public class CanteenFragment extends Fragment implements TextWatcher {
 
     //constants
     private static final String TAG = "CanteenFragment";
@@ -93,6 +95,12 @@ public class CanteenFragment extends Fragment {
         btnSave = rootView.findViewById(R.id.btnSave);
         btnSave.setOnClickListener(v -> saveCanteen());
 
+        //Add text change listener to be evaluated by TextWatcher
+        edtCanteenName.addTextChangedListener(this);
+        edtMenu.addTextChangedListener(this);
+        edtMenuPrice.addTextChangedListener(this);
+        edtAddress.addTextChangedListener(this);
+
         updateCanteen(true);
 
         // Inflate the layout for this fragment
@@ -110,6 +118,65 @@ public class CanteenFragment extends Fragment {
                 edtAddress.setText(canteen.getLocation());
             }
         }
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        //do nothing
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        //do nothing
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        validateInputFields();
+    }
+
+    private void validateInputFields() {
+        boolean formHasError = false;
+
+        //validate Canteen Name
+        String canteenName = ((TextInputEditText)rootView.findViewById(R.id.edtCanteenName)).getText().toString();
+        if (canteenName.length() > 0) {
+            edtCanteenName.setError(null);
+        } else {
+            formHasError = true;
+            edtCanteenName.setError("Name must not be empty!");
+        }
+
+        //validate Menu Name
+        String menuName = ((TextInputEditText)rootView.findViewById(R.id.edtMenu)).getText().toString();
+        if (menuName.length() > 0) {
+            edtMenu.setError(null);
+        } else {
+            formHasError = true;
+            edtMenu.setError("Name must not be empty!");
+        }
+
+        String value = ((TextInputEditText)rootView.findViewById(R.id.edtMenuPrice)).getText().toString();
+        if (value.length() > 0) {
+            Float price = Float.valueOf(value.replace(",", ".").substring(1));
+
+            if (price > 0) {
+                edtMenuPrice.setError(null);
+            } else {
+                formHasError = true;
+                edtMenuPrice.setError("Price must be > 0€!");
+            }
+        }
+
+        String address = ((TextInputEditText)rootView.findViewById(R.id.edtAddress)).getText().toString();
+        if (address.length() > 0) {
+            edtAddress.setError(null);
+        } else {
+            formHasError = true;
+            edtAddress.setError("Name must not be empty!");
+        }
+
+        btnSave.setEnabled(!formHasError);
     }
 
     private class SeekbarListener implements SeekBar.OnSeekBarChangeListener {
@@ -147,6 +214,7 @@ public class CanteenFragment extends Fragment {
                     }
                     CanteenFragment.this.loadedCanteen = Integer.valueOf(canteen.getId());
                     updateCanteenDetailsInView(canteen);
+                    validateInputFields();
                 }
             }
         }.execute();
@@ -192,7 +260,7 @@ public class CanteenFragment extends Fragment {
     private void updateCanteenDetailsInView(Canteen canteen) {
         edtCanteenName.setText(canteen.getName());
         edtMenu.setText(canteen.getSetMeal());
-        edtMenuPrice.setText(NumberFormat.getCurrencyInstance().format(canteen.getSetMealPrice()));
+        edtMenuPrice.setText(NumberFormat.getCurrencyInstance().format(canteen.getSetMealPrice()).replace("€", ""));
         edtAddress.setText(canteen.getLocation());
         edtWebsite.setText(canteen.getWebsite());
         edtPhoneNumber.setText(canteen.getPhoneNumber());
