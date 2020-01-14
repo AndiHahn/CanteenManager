@@ -61,16 +61,6 @@ public class ServiceProxy {
     }
 
     private interface Proxy {
-
-        //@GET("/Public/Canteen")
-        //Call<Collection<ProxyCanteen>> getCanteens(@Query("nameFilter") String filter);
-
-        //@GET("/Public/Canteen/{id}")
-        //Call<ProxyCanteen> getCanteen(@Path("id") String canteenId);
-
-        //@GET("/Public/Canteen/{id}/Rating?nrOfRatings=0")
-        //Call<ProxyReviewData> getReviewDataForCanteen(@Path("id") String canteenId);
-
         @POST("/Admin/Login")
         Call<String> postLogin(@Body ProxyLogin login);
 
@@ -85,10 +75,6 @@ public class ServiceProxy {
 
         @DELETE("/Admin/Canteen/Rating/{ratingId}")
         Call<Void> deleteRating(@Header("Authorization") String authenticationToken, @Path("ratingId") String ratingId);
-
-        //@POST("/Admin/Canteen/Rating")
-        //Call<ProxyRating> postRating(@Header("Authorization") String authenticationToken, @Body ProxyNewRating rating);
-
     }
 
     private static class ProxyLogin {
